@@ -1,0 +1,29 @@
+In Alpine container with rpm installed:
+# RHEL has a much better syscall info compared to Debian and Alpine!
+$ wget https://rpmfind.net/linux/centos-stream/9-stream/AppStream/x86_64/os/Packages/kernel-devel-5.14.0-47.el9.x86_64.rpm
+$ sudo rpm -i --nodeps kernel-devel-5.14.0-47.el9.x86_64.rpm
+$ ls /usr/src/kernels/5.14.0-47.el9.x86_64/
+$ find /usr/src/kernels/5.14.0-47.el9.x86_64/ -type f -name "syscall*.*"
+--> /usr/src/kernels/5.14.0-47.el9.x86_64/arch/x86/include/generated/asm/syscalls_64.h
+--> /usr/src/kernels/5.14.0-47.el9.x86_64/arch/x86/entry/syscalls/syscall_64.tbl
+--> /usr/src/kernels/5.14.0-47.el9.x86_64/include/linux/syscalls.h
+$ find /usr/src/kernels/5.14.0-47.el9.x86_64/ -type f -name "unistd*.*"
+--> /usr/src/kernels/5.14.0-47.el9.x86_64/arch/x86/include/generated/uapi/asm/unistd_64.h
+
+Copy files into kernel/ for processing:
+  1. use cp to cppy header file from /usr/src/kernels/5.14.0-47.el9.x86_64/... to home dir to expose it in the local file system (outside the container)
+  2. use the UI's Upload File function to upload it.
+
+$ cp /usr/src/kernels/5.14.0-47.el9.x86_64/arch/x86/entry/syscalls/{syscall_32.tbl,syscall_64.tbl} /usr/src/kernels/5.14.0-47.el9.x86_64/arch/x86/include/generated/asm/{syscalls_32.h,syscalls_64.h} /usr/src/kernels/5.14.0-47.el9.x86_64/include/linux/syscalls.h /usr/src/kernels/5.14.0-47.el9.x86_64/arch/x86/include/generated/uapi/asm/{unistd_64.h,unistd_32.h} .
+
+/usr/src/kernels/5.14.0-47.el9.x86_64/include/asm-generic/syscalls.h: sys_mmap, sys_rt_sigreturn
+asmlinkage long sys_mmap(unsigned long addr, unsigned long len,
+			unsigned long prot, unsigned long flags,
+			unsigned long fd, off_t pgoff);
+asmlinkage long sys_rt_sigreturn(struct pt_regs *regs);
+
+asmlinkage int sys_modify_ldt(int func, void __user *ptr, unsigned long bytecount) - oblolete?
+asmlinkage long sys_arch_prctl(int code, unsigned long addr) - not portable 
+asmlinkage long sys_iopl(unsigned int level) - deprecated
+
+/usr/src/kernels/5.14.0-47.el9.x86_64/include/linux/compat.h
